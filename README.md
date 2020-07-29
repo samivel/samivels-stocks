@@ -1,8 +1,7 @@
 # cs50-finance
-## Web Application for the 'virtual' buying and selling of stocks
-##### This app is part of the cs50 web track.
+## Web Application for virtual stock trading.
+#### Users can log in and make stock trades with real prices in real time.
 
-##### Stock trading website where users can log in and make stock trades with real prices in real time.
 
 * Built with python, flask, html&css, javascript.
 * Database (local) = SQLite.
@@ -15,3 +14,5 @@ Dependencies
 * flask
 * cs50 (python module)
 * requests (python module)
+
+##### This app is part of the cs50 web track.
