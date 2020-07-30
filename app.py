@@ -1,5 +1,9 @@
 import os
 
+import sys
+
+sys.path.append('~/Dropbox/CS50/webTrack/finance')
+
 from cs50 import SQL
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_session import Session
@@ -139,3 +143,6 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+if __name__ == "__main__":
+    app.run(debug=True)
