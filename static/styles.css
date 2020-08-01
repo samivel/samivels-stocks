@@ -45,3 +45,10 @@ main img
     /* constrain images on small screens */
     max-width: 100%;
 }
+body {
+    background-color: azure;
+}
+.jumbotron {
+    background-color: #537fbe;
+    color: #ffffff;
+}
