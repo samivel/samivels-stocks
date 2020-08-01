@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+
+<div class="card">
+    <h2 style="margin-top: 20px;">Quote</h2>
+    <form style="margin: 20px;" method="post" action="/quote" autocomplete="off">
+        <div class="form-group">
+            <input type="text" name="symbol" class="form-control" placeholder="Symbol">
+            <small style="margin-top: 12px;" class="form-text text-muted">Search for stock symbol, NFLX for example.</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Quote</button>
+    </form>
+
+</div>
+
+
+{% endblock %}

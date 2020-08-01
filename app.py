@@ -115,16 +115,23 @@ def logout():
     return redirect("/")
 
 
-# @app.route("/quote", methods=["GET", "POST"])
-# @login_required
-# def quote():
-#     if request.method == "POST":
+@app.route("/quote", methods=["GET", "POST"])
+@login_required
+def quote():
 
+    # If method is post, search for stock and return the price
+    if request.method == "POST":
+        symbol = lookup(request.form.get("symbol"))
 
+        # Ensures symbol exists and returns its info
+        if symbol == None:
+            flash('Symbol does not exist', 'danger')
+            return redirect('/quote')
+        else:
+            return render_template("quoted.html", name=symbol['name'], symbol=symbol['symbol'], price=symbol['price'])
 
-
-#     else:
-#         return apology("/quote")
+    else:
+        return render_template("/quote.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -182,4 +189,4 @@ for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

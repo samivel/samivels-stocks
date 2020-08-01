@@ -47,8 +47,5 @@ main img
 }
 body {
     background-color: azure;
-}
-.jumbotron {
-    background-color: #537fbe;
-    color: #ffffff;
+    font-family: Raleway, sans-serif;
 }
