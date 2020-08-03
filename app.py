@@ -43,18 +43,59 @@ if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
 
+
 @app.route("/")
 @login_required
 def index():
-    """Show portfolio of stocks"""
-    return apology("TODO")
+    return render_template('index.html')
+
 
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
-    """Buy shares of stock"""
-    return apology("TODO")
+    # Find users current balance
+    balance = db.execute('SELECT cash FROM users WHERE id = :id', id=session["user_id"])
+    
+    if request.method == "POST":
+
+        # Assigns users input to variables
+        symbol = lookup(request.form.get("symbol"))
+        shares = request.form.get("shares")
+        
+
+        # Ensures valid symbol
+        if not symbol:
+            flash('Invalid symbol', 'danger')
+            return redirect('/buy')
+        # Ensures shares != 0
+        elif shares == '':
+            flash('Shares required', 'danger')
+            return redirect('/buy')
+        
+
+        # Ensures user has enough money
+        elif balance[0]['cash'] < (float(symbol["price"]) * int(shares)):
+            flash("Insuffeciant funds", "warning")
+            return redirect('/buy')
+        
+        # Add purchase log to 'transactions' table
+        # Update users cash
+        # redirect home
+        else:
+            db.execute("INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)", user_id=session["user_id"], symbol=symbol['symbol'], quantity=int(shares), price=symbol["price"])
+            db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=(float(symbol["price"]) * int(shares)), user_id=session["user_id"])
+            return redirect("/")
+
+        
+
+        
+
+
+
+    else:
+        # Shows buy page with users curent account balance
+        return render_template('buy.html', balance=usd(balance[0]['cash']))
 
 
 @app.route("/history")
@@ -128,7 +169,7 @@ def quote():
             flash('Symbol does not exist', 'danger')
             return redirect('/quote')
         else:
-            return render_template("quoted.html", name=symbol['name'], symbol=symbol['symbol'], price=symbol['price'])
+            return render_template("quoted.html", name=symbol['name'], symbol=symbol['symbol'], price=usd(symbol['price']))
 
     else:
         return render_template("/quote.html")
