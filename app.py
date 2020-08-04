@@ -50,7 +50,7 @@ def index():
     # Get users cash balance
     balance = db.execute('SELECT cash FROM users WHERE id = :id', id=session["user_id"])
     # Gets users holdings information
-    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id', id=session["user_id"])
+    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id ORDER BY quantity DESC', id=session["user_id"])
     # Set variable to track gross profit/loss
     grossProfit = 0
     grossBalance = 0
@@ -67,7 +67,7 @@ def index():
     grossBalance += float(balance[0]["cash"])
 
 
-    return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit="%.2f"%grossProfit, grossBalance=usd(grossBalance))
+    return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit=usd(grossProfit), grossBalance=usd(grossBalance))
 
 
 
