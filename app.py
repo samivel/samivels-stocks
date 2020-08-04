@@ -108,7 +108,7 @@ def buy():
             quantityNew = int(check[0]['quantity']) + int(shares)
             totalNew = float(check[0]['total']) + price
 
-            db.execute("UPDATE holdings SET quantity = :quantity, total = :total WHERE user_id = :user_id", quantity=quantityNew, total=totalNew, user_id=session["user_id"])
+            db.execute("UPDATE holdings SET quantity = :quantity, total = :total WHERE user_id = :user_id AND symbol = :symbol", quantity=quantityNew, total=totalNew, user_id=session["user_id"], symbol=symbol['symbol'])
 
         # Add purchase log to 'holdings' table
         # Update users cash
