@@ -47,7 +47,27 @@ if not os.environ.get("API_KEY"):
 @app.route("/")
 @login_required
 def index():
-    return render_template('index.html')
+    # Get users cash balance
+    balance = db.execute('SELECT cash FROM users WHERE id = :id', id=session["user_id"])
+    # Gets users holdings information
+    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id', id=session["user_id"])
+    # Set variable to track gross profit/loss
+    grossProfit = 0
+    grossBalance = 0
+    # iterate through holdings, adding non db information to "holdings"
+    for i in range(len(holdings)):
+        stock = lookup(holdings[i]["symbol"])
+        holdings[i]["company"] = stock["name"]
+        holdings[i]["currentPrice"] = "%.2f"%(stock["price"])
+        holdings[i]["currentTotal"] = "%.2f"%(float(stock["price"]) * float(holdings[i]["quantity"]))
+        holdings[i]["profit"] = "%.2f"%(float(holdings[i]["currentTotal"]) - float(holdings[i]["total"]))
+        grossProfit += float(holdings[i]["profit"])
+        grossBalance += float(holdings[i]["currentTotal"])
+
+    grossBalance += float(balance[0]["cash"])
+
+
+    return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit="%.2f"%grossProfit, grossBalance=usd(grossBalance))
 
 
 
@@ -69,29 +89,36 @@ def buy():
             flash('Invalid symbol', 'danger')
             return redirect('/buy')
         # Ensures shares != 0
-        elif shares == '':
+        if shares == '':
             flash('Shares required', 'danger')
             return redirect('/buy')
-        
+        # Set price for current quantity of shares
+        price = float(symbol["price"]) * int(shares)
 
         # Ensures user has enough money
-        elif balance[0]['cash'] < (float(symbol["price"]) * int(shares)):
+        if balance[0]['cash'] < price:
             flash("Insuffeciant funds", "warning")
             return redirect('/buy')
         
-        # Add purchase log to 'transactions' table
+        # Check if stock symbol is already in users holdings
+        check = db.execute('SELECT * FROM holdings WHERE symbol = :symbol AND user_id = :user_id', symbol=symbol['symbol'], user_id=session["user_id"])
+        
+        # If user already owns symbol, update the quantity and total spent on all of that symbol
+        if len(check) == 1:
+            quantityNew = int(check[0]['quantity']) + int(shares)
+            totalNew = float(check[0]['total']) + price
+
+            db.execute("UPDATE holdings SET quantity = :quantity, total = :total WHERE user_id = :user_id", quantity=quantityNew, total=totalNew, user_id=session["user_id"])
+
+        # Add purchase log to 'holdings' table
         # Update users cash
         # redirect home
         else:
-            db.execute("INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)", user_id=session["user_id"], symbol=symbol['symbol'], quantity=int(shares), price=symbol["price"])
-            db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=(float(symbol["price"]) * int(shares)), user_id=session["user_id"])
-            return redirect("/")
+            db.execute("INSERT INTO holdings (user_id, symbol, quantity, price, total) VALUES(:user_id, :symbol, :quantity, :price, :total)", user_id=session["user_id"], symbol=symbol['symbol'], quantity=int(shares), price=symbol["price"], total=price)
 
-        
-
-        
-
-
+        db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=price, user_id=session["user_id"])
+        db.execute("INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)", user_id=session["user_id"], symbol=symbol['symbol'], quantity=int(shares), price=symbol["price"])
+        return redirect("/")
 
     else:
         # Shows buy page with users curent account balance

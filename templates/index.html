@@ -3,8 +3,46 @@
     Home
 {% endblock %}
 
-index
 {% block main %}
-
+<div class="jumbotron">
+    <h2 style="margin-bottom: 20px;">Current Holdings</h2>
+    <div class="container">
+        <table style="w-auto" class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Symbol</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Shares</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Profit</th>
+                    <th scope="col">TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in holdings %}
+                <tr>
+                    <td>{{ stock.symbol }}</td>
+                    <td>{{ stock.company}}</td>
+                    <td>{{ stock.quantity }}</td>
+                    <td>${{ stock.currentPrice }}</td>
+                    <td>${{ stock.profit }}</td>
+                    <td>${{ stock.currentTotal }}</td>
+                    
+                </tr>
+                {% endfor %}
+                <tr style="border-bottom: 2px gray solid; border-left: 2px solid gray;">
+                    <td style="font-weight: bold;">CASH</td>
+                    <td colspan="4"></td>
+                    <td>{{ cash }}</td>
+                </tr>
+                <tfoot style="border-right: 2px solid gray;">
+                    <td colspan="5"></td>
+                    <td>{{ grossBalance }}</td>
+                </tfoot>
+            </tbody>
+        </table>
+    </div>
+</div>
+{{ grossProfit }}
 
 {% endblock %}

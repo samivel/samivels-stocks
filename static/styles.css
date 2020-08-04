@@ -49,3 +49,8 @@ body {
     background-color: azure;
     font-family: Roboto, sans-serif;
 }
+.jumbotron {
+    border: black solid 1px;
+    background-color: white;
+    width: 120%;
+}
