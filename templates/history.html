@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+
+    <h2 style="margin-bottom: 30px;">Account Transaction History</h2>
+    <div class="container">
+        <table style="w-auto;" class="table table-striped table-hover">
+            <thead style="border-left: 2px solid gray;" class="thead-dark">
+                <tr>
+                    <th scope="col">Symbol</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Date/Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in transactions %}
+                <tr style="border-left: 2px solid rgb(87, 87, 87)">
+                    <td>{{ item.symbol }}</td>
+                    <td>{{ item.price}}</td>
+
+                    {% if item.quantity > 0 %}
+                    <td style="color: green; font-weight: bold;" >{{ item.quantity }}</td>
+                    {% else %}
+                    <td style="color: red; font-weight: bold;" >{{ item.quantity }}</td>
+                    {% endif %}
+                    <td>{{ item.datetime }}</td>
+                </tr>
+                    {% endfor %}
+                
+                <tfoot style="border-right: 2px solid gray; border-top: 2px solid gray; font-weight: bolder;">
+                    <td colspan="1"></td>
+                    <td style="font-style: italic; text-align: right;"># of transactions - </td>
+                    <td style="text-align: left;" >{{ transCount }}</td>
+                </tfoot>
+            </tbody>
+        </table>
+    </div>
+
+
+
+{% endblock %}

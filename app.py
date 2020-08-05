@@ -69,7 +69,7 @@ def index():
 
     
     if session['flash'] == True:
-        flash("Order Successful", "primary")
+        flash("Succesfull Transaction", "primary")
         session['flash'] = False
         return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit=grossProfit, grossBalance=usd(grossBalance))
     else:
@@ -133,8 +133,9 @@ def buy():
 @app.route("/history")
 @login_required
 def history():
-    """Show history of transactions"""
-    return apology("TODO")
+    transactions = db.execute('SELECT * FROM transactions WHERE user_id = :user_id ORDER BY datetime DESC', user_id=session['user_id'])
+    transCount = db.execute('SELECT COUNT(*) FROM transactions WHERE user_id = :user_id', user_id=session['user_id'])
+    return render_template('history.html', transactions=transactions, transCount=transCount[0]['COUNT(*)'])
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -278,6 +279,7 @@ def sell():
             # Update transaction log
             db.execute('INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)', user_id=session['user_id'], symbol=symbol["symbol"], quantity=-quantity, price=symbol["price"])
 
+            session['flash'] = True
             return redirect('/')
 
         else:
@@ -299,7 +301,7 @@ def sell():
             db.execute('UPDATE users SET cash = :cash WHERE id = :user_id', cash=(price + balance[0]["cash"]), user_id=session['user_id'])
             # Update transaction log
             db.execute('INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)', user_id=session['user_id'], symbol=symbol["symbol"], quantity=-quantity, price=symbol["price"])
-
+            session['flash'] = True
             return redirect('/')
 
 
