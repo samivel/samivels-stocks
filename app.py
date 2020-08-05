@@ -44,6 +44,7 @@ if not os.environ.get("API_KEY"):
 
 
 
+
 @app.route("/")
 @login_required
 def index():
@@ -61,14 +62,18 @@ def index():
         holdings[i]["currentPrice"] = "%.2f"%(stock["price"])
         holdings[i]["currentTotal"] = "%.2f"%(float(stock["price"]) * float(holdings[i]["quantity"]))
         holdings[i]["profit"] = "%.2f"%(float(holdings[i]["currentTotal"]) - float(holdings[i]["total"]))
-        grossProfit += float(holdings[i]["profit"])
+        grossProfit += float("%.2f"%float(holdings[i]["profit"]))
         grossBalance += float(holdings[i]["currentTotal"])
 
     grossBalance += float(balance[0]["cash"])
 
-
-    return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit=usd(grossProfit), grossBalance=usd(grossBalance))
-
+    
+    if session['flash'] == True:
+        flash("Order Successful", "primary")
+        session['flash'] = False
+        return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit=grossProfit, grossBalance=usd(grossBalance))
+    else:
+        return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit=grossProfit, grossBalance=usd(grossBalance))
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -76,7 +81,6 @@ def index():
 def buy():
     # Find users current balance
     balance = db.execute('SELECT cash FROM users WHERE id = :id', id=session["user_id"])
-    
     if request.method == "POST":
 
         # Assigns users input to variables
@@ -100,6 +104,7 @@ def buy():
             flash("Insuffeciant funds", "warning")
             return redirect('/buy')
         
+        session['flash'] = True
         # Check if stock symbol is already in users holdings
         check = db.execute('SELECT * FROM holdings WHERE symbol = :symbol AND user_id = :user_id', symbol=symbol['symbol'], user_id=session["user_id"])
         
@@ -159,7 +164,7 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
-
+        session['flash'] = False
         # Redirect user to home page
         return redirect("/")
 
@@ -239,10 +244,49 @@ def register():
 
 
 @app.route("/sell", methods=["GET", "POST"])
-@login_required
+@login_required   
 def sell():
-    """Sell shares of stock"""
-    return apology("TODO")
+    # Gets users balance and holdings
+    balance = db.execute('SELECT cash FROM users WHERE id = :id', id=session["user_id"])
+    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id', id=session['user_id'])
+
+    if request.method == "POST":
+        # Gets symbol and removes the number of shares which was a srtring sent from the postform
+        symbolfromform = request.form.get("symbol").split(',')[0]
+        quantity = int(request.form.get("quantity"))
+        
+        # Ensures user has enough shares
+        if quantity > holdings[0]["quantity"]:
+            flash("You do not own that many shares", "danger")
+            return redirect("/sell")
+        else:
+
+            # Gets api info on stock
+            symbol = lookup(symbolfromform)
+            # Gets info on chosen stock to refrence below
+            stock = db.execute("SELECT * FROM holdings WHERE user_id = :user_id AND symbol = :symbol", user_id=session['user_id'], symbol=symbol["symbol"])
+            # Current price plus quantity
+            price = (symbol['price'] * quantity)
+            # New total for holdings
+            newTotal = stock[0]['total'] - price
+            # New quantity for holdings
+            newQuantity = stock[0]["quantity"] - quantity
+            
+            # Update holdings
+            db.execute('UPDATE holdings SET quantity = :quantity, total = :total WHERE user_id = :user_id AND symbol = :symbol', quantity=newQuantity, total=newTotal, user_id=session["user_id"], symbol=symbol["symbol"])
+            # Update users cash
+            db.execute('UPDATE users SET cash = :cash WHERE id = :user_id', cash=(price + balance[0]["cash"]), user_id=session['user_id'])
+            # Update transaction log
+            db.execute('INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)', user_id=session['user_id'], symbol=symbol["symbol"], quantity=-quantity, price=symbol["price"])
+
+            return render_template("/test.html", symbol=symbol['symbol'], quantity=quantity, newTotal=newTotal, newQuantity=newQuantity)
+
+
+
+
+    else:
+
+        return render_template('sell.html', balance=usd(balance[0]["cash"]), holdings=holdings)
 
 
 def errorhandler(e):

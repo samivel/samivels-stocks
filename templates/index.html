@@ -37,8 +37,17 @@
                 </tr>
                 <tfoot style="border-right: 2px solid gray; font-weight: bolder;">
                     <td colspan="3"></td>
-                    <td style="font-style: italic;">total</td>
-                    <td>{{ grossProfit }}</td>
+                    <td style="font-style: italic;">gross</td>
+
+                    
+                    {% if grossProfit > 0 %}
+                    <td style="color: green;">+${{ grossProfit }}</td>
+                    {% elif grossProfit == 0 %}
+                    <td>${{ grossProfit }}</td>
+                    {% else %}
+                    <td style="color: red;">-${{ grossProfit }}</td>
+                    {% endif %}
+                    
                     <td>{{ grossBalance }}</td>
                 </tfoot>
             </tbody>

@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block title %}
+    Sell
+{% endblock %}
+
+{% block main %}
+
+<div class="card">
+    <h2 style="margin-top: 20px;">Sell</h2>
+    <h4>Current Balance: {{ balance }}</h4>
+    <form style="margin: 20px;" method="post" action="/sell" autocomplete="off">
+        <div class="form-group">
+            <div style="margin-bottom: 20px;">
+                <select class="form-control" name="symbol">
+                    <option disabled selected>Stock</option>
+                    {% for symbol in holdings %}
+                    <option>{{ symbol.symbol }}, 
+                        {% if symbol.quantity == 1 %}
+                        {{ symbol.quantity }} share</option>
+                        {% else %}
+                        {{ symbol.quantity }} shares</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="number" class="form-control" autocomplete="off" min="1" name="quantity" placeholder="Quantity of shares">
+        </div>
+        <button type="submit" class="btn btn-primary">Sell</button>
+    </form>
+</div>
+
+
+
+{% endblock %}
