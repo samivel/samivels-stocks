@@ -8,7 +8,7 @@
     <h2 style="margin-bottom: 30px;">Current Holdings</h2>
     <div class="container">
         <table style="w-auto" class="table table-striped table-hover">
-            <thead class="thead-dark">
+            <thead style="border-left: 2px solid gray" class="thead-dark">
                 <tr>
                     <th scope="col">Symbol</th>
                     <th scope="col">Name</th>
@@ -20,7 +20,7 @@
             </thead>
             <tbody>
                 {% for stock in holdings %}
-                <tr style="border-left: 2px solid gray">
+                <tr style="border-left: 2px solid rgb(87, 87, 87)">
                     <td>{{ stock.symbol }}</td>
                     <td>{{ stock.company}}</td>
                     <td>{{ stock.quantity }}</td>

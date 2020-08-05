@@ -259,6 +259,27 @@ def sell():
         if quantity > holdings[0]["quantity"]:
             flash("You do not own that many shares", "danger")
             return redirect("/sell")
+
+        elif quantity == holdings[0]['quantity']:
+            # Gets api info on stock
+            symbol = lookup(symbolfromform)
+            # Gets info on chosen stock to refrence below
+            stock = db.execute("SELECT * FROM holdings WHERE user_id = :user_id AND symbol = :symbol", user_id=session['user_id'], symbol=symbol["symbol"])
+            # Current price plus quantity
+            price = (symbol['price'] * quantity)
+            # New total for holdings
+            newTotal = stock[0]['total'] - price
+            # New quantity for holdings
+            newQuantity = stock[0]["quantity"] - quantity
+
+            db.execute('DELETE FROM holdings WHERE user_id = :user_id AND symbol = :symbol', user_id=session['user_id'], symbol=symbol['symbol'])
+
+            db.execute('UPDATE users SET cash = :cash WHERE id = :user_id', cash=(price + balance[0]["cash"]), user_id=session['user_id'])
+            # Update transaction log
+            db.execute('INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)', user_id=session['user_id'], symbol=symbol["symbol"], quantity=-quantity, price=symbol["price"])
+
+            return redirect('/')
+
         else:
 
             # Gets api info on stock
@@ -279,7 +300,7 @@ def sell():
             # Update transaction log
             db.execute('INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)', user_id=session['user_id'], symbol=symbol["symbol"], quantity=-quantity, price=symbol["price"])
 
-            return render_template("/test.html", symbol=symbol['symbol'], quantity=quantity, newTotal=newTotal, newQuantity=newQuantity)
+            return redirect('/')
 
 
 
