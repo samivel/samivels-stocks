@@ -124,7 +124,7 @@ def buy():
 
         db.execute("UPDATE users SET cash = cash - :price WHERE id = :user_id", price=price, user_id=session["user_id"])
         db.execute("INSERT INTO transactions (user_id, symbol, quantity, price) VALUES(:user_id, :symbol, :quantity, :price)", user_id=session["user_id"], symbol=symbol['symbol'], quantity=int(shares), price=symbol["price"])
-        return redirect("/")
+        return redirect("/index")
 
     else:
         # Shows buy page with users current account balance
