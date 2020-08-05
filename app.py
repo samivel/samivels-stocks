@@ -69,7 +69,7 @@ def index():
 
     
     if session['flash'] == True:
-        flash("Succesfull Transaction", "primary")
+        flash("Successful Transaction", "primary")
         session['flash'] = False
         return render_template('index.html', cash=usd(balance[0]["cash"]), holdings=holdings, grossProfit=grossProfit, grossBalance=usd(grossBalance))
     else:
@@ -101,7 +101,7 @@ def buy():
 
         # Ensures user has enough money
         if balance[0]['cash'] < price:
-            flash("Insuffeciant funds", "warning")
+            flash("Insufficient funds", "warning")
             return redirect('/buy')
         
         session['flash'] = True
@@ -126,7 +126,7 @@ def buy():
         return redirect("/")
 
     else:
-        # Shows buy page with users curent account balance
+        # Shows buy page with users current account balance
         return render_template('buy.html', balance=usd(balance[0]['cash']))
 
 
@@ -228,7 +228,7 @@ def register():
             flash('Passwords do not match!', 'danger')
             return redirect("/register")
         
-        # Ensures user doesnt already exist
+        # Ensures user doesn't already exist
         elif len(rows) == 1:
             flash('Username already exists!', 'danger')
             return redirect("/register")
@@ -252,7 +252,7 @@ def sell():
     holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id', id=session['user_id'])
 
     if request.method == "POST":
-        # Gets symbol and removes the number of shares which was a srtring sent from the postform
+        # Gets symbol and removes the number of shares which was a string sent from the postform
         symbolfromform = request.form.get("symbol").split(',')[0]
         quantity = int(request.form.get("quantity"))
         
@@ -264,7 +264,7 @@ def sell():
         elif quantity == holdings[0]['quantity']:
             # Gets api info on stock
             symbol = lookup(symbolfromform)
-            # Gets info on chosen stock to refrence below
+            # Gets info on chosen stock to reference below
             stock = db.execute("SELECT * FROM holdings WHERE user_id = :user_id AND symbol = :symbol", user_id=session['user_id'], symbol=symbol["symbol"])
             # Current price plus quantity
             price = (symbol['price'] * quantity)
@@ -286,7 +286,7 @@ def sell():
 
             # Gets api info on stock
             symbol = lookup(symbolfromform)
-            # Gets info on chosen stock to refrence below
+            # Gets info on chosen stock to reference below
             stock = db.execute("SELECT * FROM holdings WHERE user_id = :user_id AND symbol = :symbol", user_id=session['user_id'], symbol=symbol["symbol"])
             # Current price plus quantity
             price = (symbol['price'] * quantity)
