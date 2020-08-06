@@ -50,9 +50,9 @@ db = SQL("postgres://lrseypfxcrozpu:675b40e72d61c125def1b3dddea312df1add78d80494
 @login_required
 def index():
     # Get users cash balance
-    balance = db.execute('SELECT cash FROM users WHERE id = :id', id=session["user_id"])
+    balance = db.execute('SELECT cash FROM users WHERE id = :id ;', id=session["user_id"])
     # Gets users holdings information
-    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id ORDER BY quantity DESC', id=session["user_id"])
+    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id ORDER BY quantity DESC ;', id=session["user_id"])
     # Set variable to track gross profit/loss
     grossProfit = 0
     grossBalance = 0
@@ -158,7 +158,7 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
+        rows = db.execute("SELECT * FROM users WHERE username = :username ;", username=request.form.get("username"))
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
@@ -218,7 +218,7 @@ def register():
         confirmation = request.form.get("confirmation")
 
         # Checks if user is in table already
-        rows = db.execute("SELECT * FROM users WHERE username = :username", username=username)
+        rows = db.execute("SELECT * FROM users WHERE username = :username ;", username=username)
 
         # Ensures all fields have input
         if not username or not password or not confirmation:
@@ -236,7 +236,7 @@ def register():
 
         # Hash password and insert user to db
         else:
-            db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=username, hash=generate_password_hash(password))
+            db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash) ;", username=username, hash=generate_password_hash(password))
             return redirect('/login?success=yes')
 
             
