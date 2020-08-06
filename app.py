@@ -35,7 +35,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure CS50 Library to use SQLite database
-db = SQL("postgres://lrseypfxcrozpu:675b40e72d61c125def1b3dddea312df1add78d80494b50c325656aec0bbbc09@ec2-184-73-249-9.compute-1.amazonaws.com:5432/d8i6octqg37aga")
+db = SQL("sqlite:///finance.db")
 
 
 
@@ -50,9 +50,9 @@ db = SQL("postgres://lrseypfxcrozpu:675b40e72d61c125def1b3dddea312df1add78d80494
 @login_required
 def index():
     # Get users cash balance
-    balance = db.execute('SELECT cash FROM users WHERE id = :id ;', id=session["user_id"])
+    balance = db.execute('SELECT cash FROM users WHERE id = :id;', id=session["user_id"])
     # Gets users holdings information
-    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id ORDER BY quantity DESC ;', id=session["user_id"])
+    holdings = db.execute('SELECT * FROM holdings WHERE user_id = :id ORDER BY quantity DESC', id=session["user_id"])
     # Set variable to track gross profit/loss
     grossProfit = 0
     grossBalance = 0
@@ -218,7 +218,7 @@ def register():
         confirmation = request.form.get("confirmation")
 
         # Checks if user is in table already
-        rows = db.execute("SELECT * FROM users WHERE username = :username ;", username=username)
+        rows = db.execute("SELECT * FROM users WHERE username = :username", username=username)
 
         # Ensures all fields have input
         if not username or not password or not confirmation:
@@ -236,7 +236,7 @@ def register():
 
         # Hash password and insert user to db
         else:
-            db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash) ;", username=username, hash=generate_password_hash(password))
+            db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username=username, hash=generate_password_hash(password))
             return redirect('/login?success=yes')
 
             
